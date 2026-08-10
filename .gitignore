@@ -1,0 +1,11 @@
+# Android Junk Files
+KM-App/.gradle/
+KM-App/build/
+KM-App/.idea/
+KM-App/*.iml
+KM-App/app/build/
+KM-App/local.properties
+
+# OS Junk Files
+.DS_Store
+Thumbs.db
