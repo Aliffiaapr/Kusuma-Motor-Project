@@ -1,9 +1,14 @@
-package com.kusumamotors.admin
+package com.kusumamotors.admin.activity
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.kusumamotors.admin.ui.DashboardFragment
+import com.kusumamotors.admin.R
+import com.kusumamotors.admin.ui.MendatangFragment
+import com.kusumamotors.admin.ui.RiwayatFragment
+import com.kusumamotors.admin.ui.SettingFragment
 
 class MainActivity : AppCompatActivity() {
 

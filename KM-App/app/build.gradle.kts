@@ -5,11 +5,11 @@ plugins {
 
 android {
     namespace = "com.kusumamotors.admin"
-    compileSdk {
-        version = release(36) {
-            minorApiLevel = 1
-        }
+    compileSdk = 37
+    buildFeatures {
+        viewBinding = true
     }
+
 
     defaultConfig {
         applicationId = "com.kusumamotors.admin"

@@ -20,7 +20,7 @@
             android:layout_height="120dp"
             android:layout_marginBottom="24dp"
             android:contentDescription="Logo Kusuma Motors"
-            android:src="@mipmap/ic_launcher" />
+            android:src="@drawable/logo_km" />
 
         <!-- CARD CONTAINER LOGIN (Diberi maxWidth agar konsisten di Tablet) -->
         <com.google.android.material.card.MaterialCardView

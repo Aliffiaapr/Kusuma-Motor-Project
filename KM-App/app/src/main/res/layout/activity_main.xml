@@ -5,27 +5,13 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <!-- Id ini yang dipanggil: @+id/fragment_container -->
+    <!-- Id ini yang dipanggil: @+id/bottom_navigation -->
     <FrameLayout
         android:id="@+id/fragment_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginBottom="56dp" />
 
-    <!-- Tombol + Melayang (FAB) -->
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fab_add_walkin"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_marginEnd="16dp"
-        android:layout_marginBottom="72dp"
-        android:contentDescription="Tambah Input Walk-In"
-        app:srcCompat="@android:drawable/ic_input_add"
-        app:backgroundTint="#2196F3"
-        app:tint="#FFFFFF" />
-
-    <!-- Id ini yang dipanggil: @+id/bottom_navigation -->
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottom_navigation"
         android:layout_width="match_parent"

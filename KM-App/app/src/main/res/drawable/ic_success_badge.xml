@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="64dp"
+    android:height="64dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <!-- Lingkaran / Lencana Hijau -->
+    <path
+        android:fillColor="#42D68C"
+        android:pathData="M12,2C6.48,2 2,6.48 2,12s4.48,10 10,10 10,-4.48 10,-10S17.52,2 12,2z" />
+    <!-- Tanda Centang Putih -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M9.55,15.15l-3.15,-3.15c-0.39,-0.39 -1.02,-0.39 -1.41,0s-0.39,1.02 0,1.41l3.85,3.85c0.39,0.39 1.02,0.39 1.41,0l8.15,-8.15c0.39,-0.39 0.39,-1.02 0,-1.41s-1.02,-0.39 -1.41,0L9.55,15.15z" />
+</vector>

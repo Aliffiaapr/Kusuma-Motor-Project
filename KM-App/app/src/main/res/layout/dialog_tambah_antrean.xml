@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    app:cardBackgroundColor="@color/white"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="8dp"
+    app:strokeWidth="0dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="20dp">
+
+        <!-- Header Title & Close Button -->
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:text="TAMBAH ANTRIAN"
+                android:textColor="@android:color/black"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <ImageView
+                android:id="@+id/btnClose"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:clickable="true"
+                android:focusable="true"
+                android:src="@android:drawable/ic_menu_close_clear_cancel"
+                app:tint="@android:color/black" />
+        </RelativeLayout>
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:scrollbars="none">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <!-- Plat Nomor -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Plat Nomor"
+                    android:textColor="@android:color/black"
+                    android:textStyle="bold" />
+
+                <EditText
+                    android:id="@+id/etPlatNomor"
+                    android:layout_width="match_parent"
+                    android:layout_height="44dp"
+                    android:layout_marginTop="6dp"
+                    android:layout_marginBottom="12dp"
+                    android:background="#EAF4F9"
+                    android:hint="mis. H 3154 AJ"
+                    android:paddingHorizontal="12dp"
+                    android:textSize="13sp" />
+
+                <!-- Nama Pelanggan -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Nama Pelanggan"
+                    android:textColor="@android:color/black"
+                    android:textStyle="bold" />
+
+                <EditText
+                    android:id="@+id/etNama"
+                    android:layout_width="match_parent"
+                    android:layout_height="44dp"
+                    android:layout_marginTop="6dp"
+                    android:layout_marginBottom="12dp"
+                    android:background="#EAF4F9"
+                    android:hint="mis. Aliffiaapr"
+                    android:paddingHorizontal="12dp"
+                    android:textSize="13sp" />
+
+                <!-- Nomor Whatsapp -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Nomor Whatsapp"
+                    android:textColor="@android:color/black"
+                    android:textStyle="bold" />
+
+                <EditText
+                    android:id="@+id/etWhatsapp"
+                    android:layout_width="match_parent"
+                    android:layout_height="44dp"
+                    android:layout_marginTop="6dp"
+                    android:layout_marginBottom="12dp"
+                    android:background="#EAF4F9"
+                    android:hint="mis. 082 3234 567 343"
+                    android:inputType="phone"
+                    android:paddingHorizontal="12dp"
+                    android:textSize="13sp" />
+
+                <!-- Jenis Unit -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Jenis Unit"
+                    android:textColor="@android:color/black"
+                    android:textStyle="bold" />
+
+                <EditText
+                    android:id="@+id/etJenisMobil"
+                    android:layout_width="match_parent"
+                    android:layout_height="44dp"
+                    android:layout_marginTop="6dp"
+                    android:layout_marginBottom="12dp"
+                    android:background="#EAF4F9"
+                    android:hint="mis. Mercedes Benz"
+                    android:paddingHorizontal="12dp"
+                    android:textSize="13sp" />
+
+                <!-- Waktu Service -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Waktu Service"
+                    android:textColor="@android:color/black"
+                    android:textStyle="bold" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:layout_marginBottom="12dp"
+                    android:orientation="horizontal">
+
+                    <!-- Pilih Tanggal -->
+                    <TextView
+                        android:id="@+id/btnPilihTanggal"
+                        android:layout_width="0dp"
+                        android:layout_height="40dp"
+                        android:layout_marginEnd="6dp"
+                        android:layout_weight="1"
+                        android:background="#EAF4F9"
+                        android:gravity="center"
+                        android:text="14 Aug 2026 ▼"
+                        android:textColor="@android:color/black"
+                        android:textSize="12sp" />
+
+                    <!-- Pilih Jam -->
+                    <TextView
+                        android:id="@+id/btnPilihJam"
+                        android:layout_width="0dp"
+                        android:layout_height="40dp"
+                        android:layout_marginStart="6dp"
+                        android:layout_weight="1"
+                        android:background="#EAF4F9"
+                        android:gravity="center"
+                        android:text="13:30 WIB ▼"
+                        android:textColor="@android:color/black"
+                        android:textSize="12sp" />
+                </LinearLayout>
+
+                <!-- Catatan / Keluhan -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Catatan"
+                    android:textColor="@android:color/black"
+                    android:textStyle="bold" />
+
+                <EditText
+                    android:id="@+id/etKeluhan"
+                    android:layout_width="match_parent"
+                    android:layout_height="80dp"
+                    android:layout_marginTop="6dp"
+                    android:layout_marginBottom="16dp"
+                    android:background="#EAF4F9"
+                    android:gravity="top|start"
+                    android:hint="mis. Ganti oli &amp; cek kopling"
+                    android:padding="12dp"
+                    android:textSize="13sp" />
+            </LinearLayout>
+        </ScrollView>
+
+        <!-- Action Buttons -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/btnBatal"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="0dp"
+                android:layout_height="44dp"
+                android:layout_marginEnd="8dp"
+                android:layout_weight="1"
+                android:text="Batal"
+                android:textColor="#FF5252"
+                app:strokeColor="#FF5252" />
+
+            <Button
+                android:id="@+id/btnSimpan"
+                android:layout_width="0dp"
+                android:layout_height="44dp"
+                android:layout_marginStart="8dp"
+                android:layout_weight="1"
+                android:backgroundTint="#42D68C"
+                android:text="Simpan"
+                android:textColor="@android:color/white" />
+        </LinearLayout>
+
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>
