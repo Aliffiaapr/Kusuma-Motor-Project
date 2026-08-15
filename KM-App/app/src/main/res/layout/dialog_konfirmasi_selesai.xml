@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_card_white"
+    android:gravity="center_horizontal"
+    android:orientation="vertical"
+    android:padding="24dp">
+
+    <!-- Icon Peringatan Kuning -->
+    <ImageView
+        android:layout_width="70dp"
+        android:layout_height="70dp"
+        android:layout_marginBottom="16dp"
+        android:src="@android:drawable/ic_dialog_alert"
+        app:tint="#FBC02D" />
+
+    <!-- Teks Pertanyaan Konfirmasi -->
+    <TextView
+        android:id="@+id/tvPesanKonfirmasi"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:lineSpacingExtra="4dp"
+        android:text="Apakah servis untuk [ H 4444 GJ - Aliffia Anggun PR ] sudah selesai?"
+        android:textColor="#000000"
+        android:textSize="16sp"
+        android:textStyle="bold" />
+
+    <!-- Tombol Batal & Selesai -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btnBatalSelesai"
+            style="?attr/materialButtonOutlinedStyle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:layout_weight="1"
+            android:text="Batal"
+            android:textColor="#000000"
+            app:strokeColor="#000000" />
+
+        <Button
+            android:id="@+id/btnKonfirmasiSelesai"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_weight="1"
+            android:backgroundTint="#4FC3F7"
+            android:text="Selesai"
+            android:textColor="#000000"
+            android:textStyle="bold" />
+    </LinearLayout>
+</LinearLayout>

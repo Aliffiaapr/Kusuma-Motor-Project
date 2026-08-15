@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_card_white">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="20dp">
+
+        <!-- Tombol Close (X) -->
+        <ImageView
+            android:id="@+id/btnCloseDetail"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:layout_alignParentEnd="true"
+            android:background="#E0E0E0"
+            android:padding="4dp"
+            android:src="@android:drawable/ic_menu_close_clear_cancel"
+            app:tint="#000000" />
+
+        <!-- Plat Nomor -->
+        <TextView
+            android:id="@+id/tvDetailPlat"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="16dp"
+            android:text="H 4444 GJ"
+            android:textColor="#000000"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/tvDetailPlat"
+            android:orientation="vertical">
+
+            <!-- Detail Grid -->
+            <TableLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:stretchColumns="1">
+
+                <TableRow android:layout_marginBottom="6dp">
+                    <TextView
+                        android:text="Pemilik :"
+                        android:textColor="#555555"
+                        android:textSize="13sp" />
+                    <TextView
+                        android:id="@+id/tvDetailNama"
+                        android:layout_marginStart="12dp"
+                        android:text="Aliffia Anggun PR"
+                        android:textColor="#000000"
+                        android:textStyle="bold" />
+                </TableRow>
+
+                <TableRow android:layout_marginBottom="6dp">
+                    <TextView
+                        android:text="Unit :"
+                        android:textColor="#555555"
+                        android:textSize="13sp" />
+                    <TextView
+                        android:id="@+id/tvDetailUnit"
+                        android:layout_marginStart="12dp"
+                        android:text="Honda Civic Turbo"
+                        android:textColor="#000000"
+                        android:textStyle="bold" />
+                </TableRow>
+
+                <TableRow android:layout_marginBottom="6dp">
+                    <TextView
+                        android:text="Nomor :"
+                        android:textColor="#555555"
+                        android:textSize="13sp" />
+                    <TextView
+                        android:id="@+id/tvDetailWa"
+                        android:layout_marginStart="12dp"
+                        android:text="082 324 609 083"
+                        android:textColor="#000000"
+                        android:textStyle="bold" />
+                </TableRow>
+
+                <TableRow android:layout_marginBottom="8dp">
+                    <TextView
+                        android:text="Tgl / Jam :"
+                        android:textColor="#555555"
+                        android:textSize="13sp" />
+                    <TextView
+                        android:id="@+id/tvDetailTglJam"
+                        android:layout_marginStart="12dp"
+                        android:text="Senin, 12 Januari 2026 | 05:24"
+                        android:textColor="#000000"
+                        android:textStyle="bold" />
+                </TableRow>
+
+                <!-- KHUSUS HOME SERVICE: Row Alamat -->
+                <TableRow
+                    android:id="@+id/rowAlamat"
+                    android:layout_marginBottom="8dp"
+                    android:visibility="gone">
+                    <TextView
+                        android:text="Alamat :"
+                        android:textColor="#555555"
+                        android:textSize="13sp" />
+                    <TextView
+                        android:id="@+id/tvDetailAlamat"
+                        android:layout_marginStart="12dp"
+                        android:text="Jl. Dliko Indah No. 1, Blotongan"
+                        android:textColor="#000000"
+                        android:textStyle="bold" />
+                </TableRow>
+            </TableLayout>
+
+            <!-- Keluhan Box -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="Keluhan"
+                android:textColor="#555555"
+                android:textSize="13sp" />
+
+            <TextView
+                android:id="@+id/tvDetailKeluhan"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:layout_marginBottom="8dp"
+                android:background="#E1F5FE"
+                android:padding="10dp"
+                android:text="Ganti Oli"
+                android:textColor="#000000"
+                android:textSize="13sp" />
+
+            <!-- Jenis Servis -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Jenis Servis :"
+                    android:textColor="#555555"
+                    android:textSize="13sp" />
+
+                <TextView
+                    android:id="@+id/tvDetailLayanan"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:text="On-Site"
+                    android:textColor="#000000"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <!-- CONTAINER TOMBOL AKSI -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/btnHubungiWa"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="6dp"
+                    android:backgroundTint="#81D4FA"
+                    android:text="Hubungi 💬"
+                    android:textColor="#000000"
+                    android:textStyle="bold"
+                    app:cornerRadius="10dp" />
+
+                <Button
+                    android:id="@+id/btnBukaMaps"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="6dp"
+                    android:backgroundTint="#90CAF9"
+                    android:text="Buka di 📍"
+                    android:textColor="#000000"
+                    android:textStyle="bold"
+                    android:visibility="gone"
+                    app:cornerRadius="10dp" />
+            </LinearLayout>
+
+            <!-- KHUSUS HOME SERVICE: Map Preview Container -->
+            <FrameLayout
+                android:id="@+id/layoutMapPreview"
+                android:layout_width="match_parent"
+                android:layout_height="180dp"
+                android:layout_marginTop="16dp"
+                android:visibility="gone">
+
+                <ImageView
+                    android:id="@+id/imgStaticMap"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="centerCrop"
+                    android:src="@android:drawable/ic_dialog_map" />
+            </FrameLayout>
+
+        </LinearLayout>
+    </RelativeLayout>
+</ScrollView>

@@ -154,7 +154,7 @@
                         android:layout_weight="1"
                         android:background="#EAF4F9"
                         android:gravity="center"
-                        android:text="14 Aug 2026 ▼"
+                        android:text="Pilih Tanggal ▼"
                         android:textColor="@android:color/black"
                         android:textSize="12sp" />
 
@@ -167,7 +167,7 @@
                         android:layout_weight="1"
                         android:background="#EAF4F9"
                         android:gravity="center"
-                        android:text="13:30 WIB ▼"
+                        android:text="Pilih Jam ▼"
                         android:textColor="@android:color/black"
                         android:textSize="12sp" />
                 </LinearLayout>

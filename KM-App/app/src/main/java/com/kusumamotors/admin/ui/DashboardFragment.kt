@@ -2,13 +2,15 @@ package com.kusumamotors.admin.ui
 
 import android.app.AlertDialog
 import android.app.DatePickerDialog
-import android.app.TimePickerDialog
+import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.firebase.database.DataSnapshot
@@ -17,7 +19,8 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.kusumamotors.admin.AntreanAdapter
 import com.kusumamotors.admin.R
-import com.kusumamotors.admin.databinding.DialogSuccessAddBinding
+import com.kusumamotors.admin.databinding.DialogDetailAntreanBinding
+import com.kusumamotors.admin.databinding.DialogKonfirmasiSelesaiBinding
 import com.kusumamotors.admin.databinding.DialogTambahAntreanBinding
 import com.kusumamotors.admin.databinding.FragmentDashboardBinding
 import com.kusumamotors.admin.model.Antrean
@@ -29,10 +32,10 @@ import java.util.Locale
 
 class DashboardFragment : Fragment() {
 
-    // Setup ViewBinding agar aman dari NullPointerException
     private var _binding: FragmentDashboardBinding? = null
     private val binding get() = _binding!!
     private lateinit var antreanAdapter: AntreanAdapter
+    private var fullListHariIni: List<Antrean> = emptyList()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -48,26 +51,29 @@ class DashboardFragment : Fragment() {
         setupCurrentDate()
         setupRecyclerView()
         setupListeners()
+        getDataAntreanHariIni()
     }
 
-    // 1. Mengatur Tanggal Otomatis Sesuai Hari Ini (Bahasa Indonesia)
+    // 1. Tanggal Hari Ini (Format Indonesia)
     private fun setupCurrentDate() {
         val calendar = Calendar.getInstance().time
         val dateFormat = SimpleDateFormat("EEEE, d MMMM yyyy", Locale("id", "ID"))
-        val currentDateString = dateFormat.format(calendar)
-        binding.tvCurrentDate.text = currentDateString
+        binding.tvCurrentDate.text = dateFormat.format(calendar)
     }
 
-    // 2. Inisialisasi RecyclerView
+    // 2. Inisialisasi RecyclerView & Adapter
     private fun setupRecyclerView() {
         antreanAdapter = AntreanAdapter(
             context = requireContext(),
             onItemClick = { itemAntrean ->
-                // Buka Dialog Detail saat kartu diklik
+                showDialogDetailAntrean(itemAntrean)
             },
             onStatusChanged = { itemAntrean, statusBaru ->
-                // Update status antrean ke Firebase saat status diubah via PopupMenu
-                updateStatusAntreanInFirebase(itemAntrean.id, statusBaru)
+                if (statusBaru == "Selesai") {
+                    showDialogKonfirmasiSelesai(itemAntrean)
+                } else {
+                    updateStatusAntreanInFirebase(itemAntrean.id, statusBaru)
+                }
             }
         )
 
@@ -77,14 +83,12 @@ class DashboardFragment : Fragment() {
         }
     }
 
-    // 3. Listener untuk Tombol & Chip Filter
+    // 3. Listener untuk Tombol Tambah & Chip Filters
     private fun setupListeners() {
-        // FAB Tambah Antrean Manual
         binding.fabAddAntrean.setOnClickListener {
             showDialogTambahAntrean()
         }
 
-        // Filter Group 1: Status (All, Ditunda, Pending, Diproses)
         binding.chipGroupStatus.setOnCheckedStateChangeListener { _, checkedIds ->
             if (checkedIds.isNotEmpty()) {
                 when (checkedIds[0]) {
@@ -96,7 +100,6 @@ class DashboardFragment : Fragment() {
             }
         }
 
-        // Filter Group 2: Layanan (On-Site, Home Service)
         binding.chipGroupLayanan.setOnCheckedStateChangeListener { _, checkedIds ->
             if (checkedIds.isNotEmpty()) {
                 when (checkedIds[0]) {
@@ -107,21 +110,46 @@ class DashboardFragment : Fragment() {
         }
     }
 
-    private fun updateStatusAntreanInFirebase(antreanId: String, statusBaru: String) {
-        if (antreanId.isEmpty()) return
+    // 4. Load Realtime Data dari Firebase
+    private fun getDataAntreanHariIni() {
+        val dbRef = FirebaseDatabase.getInstance().getReference("reservasi")
+        val todayDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
 
-        val dbRef = FirebaseDatabase.getInstance().getReference("reservasi").child(antreanId)
+        dbRef.addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                if (!isAdded) return
 
-        // Update status di Firebase
-        dbRef.child("status").setValue(statusBaru)
-            .addOnSuccessListener {
-                // Karena kita pakai Realtime ValueEventListener di getDataAntreanHariIni(),
-                // UI RecyclerView & Angka Badge di Chip otomatis berubah sendiri!
+                val listHariIni = mutableListOf<Antrean>()
+                for (data in snapshot.children) {
+                    val item = data.getValue(Antrean::class.java)
+                    if (item != null) {
+                        item.id = data.key ?: ""
+                        if (item.tanggalReservasi == todayDate) {
+                            listHariIni.add(item)
+                        }
+                    }
+                }
+
+                fullListHariIni = listHariIni
+                antreanAdapter.submitList(listHariIni)
+                updateChipCounts(listHariIni)
             }
+
+            override fun onCancelled(error: DatabaseError) {
+                Toast.makeText(requireContext(), "Gagal memuat data: ${error.message}", Toast.LENGTH_SHORT).show()
+            }
+        })
     }
 
+    // 5. Update Status di Firebase
+    private fun updateStatusAntreanInFirebase(antreanId: String, statusBaru: String) {
+        if (antreanId.isEmpty()) return
+        val dbRef = FirebaseDatabase.getInstance().getReference("reservasi").child(antreanId)
+        dbRef.child("status").setValue(statusBaru)
+    }
+
+    // 6. Update Angka Badge Chip
     private fun updateChipCounts(listAntrean: List<Antrean>) {
-        // 1. Hitung jumlah data berdasarkan status & jenis layanan
         val totalAll = listAntrean.size
         val countDitunda = listAntrean.count { it.status.equals("Ditunda", ignoreCase = true) }
         val countPending = listAntrean.count { it.status.equals("Pending", ignoreCase = true) }
@@ -130,7 +158,6 @@ class DashboardFragment : Fragment() {
         val countOnSite = listAntrean.count { it.layanan.equals("On-Site", ignoreCase = true) }
         val countHomeService = listAntrean.count { it.layanan.equals("Home Service", ignoreCase = true) }
 
-        // 2. Setel teks Chip secara dinamis
         binding.chipAll.text = if (totalAll > 0) "All ($totalAll)" else "All"
         binding.chipDitunda.text = if (countDitunda > 0) "Ditunda ($countDitunda)" else "Ditunda"
         binding.chipPending.text = if (countPending > 0) "Pending ($countPending)" else "Pending"
@@ -139,50 +166,93 @@ class DashboardFragment : Fragment() {
         binding.chipOnSite.text = if (countOnSite > 0) "On-Site ($countOnSite)" else "On-Site"
         binding.chipHomeService.text = if (countHomeService > 0) "Home Service ($countHomeService)" else "Home Service"
     }
+
+    // 7. Filter Data Status & Layanan
     private fun filterDataByStatus(status: String) {
-        // TODO: Logika menyaring list data berdasarkan status
+        if (status == "All") {
+            antreanAdapter.submitList(fullListHariIni)
+        } else {
+            val filtered = fullListHariIni.filter { it.status.equals(status, ignoreCase = true) }
+            antreanAdapter.submitList(filtered)
+        }
     }
 
     private fun filterDataByLayanan(layanan: String) {
-        // TODO: Logika menyaring list data berdasarkan jenis layanan
+        val filtered = fullListHariIni.filter { it.layanan.equals(layanan, ignoreCase = true) }
+        antreanAdapter.submitList(filtered)
     }
 
-    private fun getDataAntreanHariIni() {
-        val dbRef = FirebaseDatabase.getInstance().getReference("reservasi")
+    // 8. Dialog Detail Antrean (On-Site & Home Service)
+    private fun showDialogDetailAntrean(item: Antrean) {
+        val bindingDialog = DialogDetailAntreanBinding.inflate(layoutInflater)
+        val dialog = AlertDialog.Builder(requireContext())
+            .setView(bindingDialog.root)
+            .create()
 
-        // Format tanggal hari ini (yyyy-MM-dd)
-        val todayDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
+        dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
 
-        dbRef.addValueEventListener(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                val listAntreanHariIni = mutableListOf<Antrean>()
+        with(bindingDialog) {
+            tvDetailPlat.text = item.platNomor
+            tvDetailNama.text = item.displayNama
+            tvDetailUnit.text = item.displayUnit
+            tvDetailWa.text = item.displayWa
+            tvDetailTglJam.text = "${item.tanggalReservasi} | ${item.waktuServis}"
+            tvDetailKeluhan.text = item.displayCatatan
+            tvDetailLayanan.text = item.layanan
 
-                for (data in snapshot.children) {
-                    val item = data.getValue(Antrean::class.java)
-                    if (item != null) {
-                        item.id = data.key ?: ""
+            if (item.layanan.equals("Home Service", ignoreCase = true)) {
+                rowAlamat.visibility = View.VISIBLE
+                btnBukaMaps.visibility = View.VISIBLE
+                layoutMapPreview.visibility = View.VISIBLE
+                tvDetailAlamat.text = item.alamat.ifEmpty { "-" }
 
-                        // Filter: Hanya ambil antrean untuk HARI INI
-                        if (item.tanggalReservasi == todayDate) {
-                            listAntreanHariIni.add(item)
-                        }
+                btnBukaMaps.setOnClickListener {
+                    val alamatEncoded = Uri.encode(item.alamat)
+                    val gmmIntentUri = Uri.parse("geo:0,0?q=$alamatEncoded")
+                    val mapIntent = Intent(Intent.ACTION_VIEW, gmmIntentUri).apply {
+                        setPackage("com.google.android.apps.maps")
                     }
+                    startActivity(mapIntent)
                 }
-
-                // 1. Tampilkan ke RecyclerView Adapter
-                antreanAdapter.submitList(listAntreanHariIni)
-
-                // 2. Perbarui Angka Badge di Chip Group atas secara otomatis!
-                updateChipCounts(listAntreanHariIni)
+            } else {
+                rowAlamat.visibility = View.GONE
+                btnBukaMaps.visibility = View.GONE
+                layoutMapPreview.visibility = View.GONE
             }
 
-            override fun onCancelled(error: DatabaseError) {
-                // Handle error jika koneksi bermasalah
+            btnCloseDetail.setOnClickListener { dialog.dismiss() }
+
+            btnHubungiWa.setOnClickListener {
+                val nomorWa = item.displayWa.replace("[^0-9]".toRegex(), "")
+                val url = "https://api.whatsapp.com/send?phone=$nomorWa"
+                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+                startActivity(intent)
             }
-        })
+        }
+
+        dialog.show()
     }
 
+    // 9. Dialog Konfirmasi Selesai
+    private fun showDialogKonfirmasiSelesai(item: Antrean) {
+        val bindingDialog = DialogKonfirmasiSelesaiBinding.inflate(layoutInflater)
+        val dialog = AlertDialog.Builder(requireContext())
+            .setView(bindingDialog.root)
+            .create()
 
+        dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+
+        bindingDialog.tvPesanKonfirmasi.text = "Apakah servis untuk [ ${item.platNomor} - ${item.displayNama} ] sudah selesai?"
+        bindingDialog.btnBatalSelesai.setOnClickListener { dialog.dismiss() }
+        bindingDialog.btnKonfirmasiSelesai.setOnClickListener {
+            dialog.dismiss()
+            updateStatusAntreanInFirebase(item.id, "Selesai")
+        }
+
+        dialog.show()
+    }
+
+    // 10. Dialog Tambah Antrean Manual
     private fun showDialogTambahAntrean() {
         val dialogBinding = DialogTambahAntreanBinding.inflate(layoutInflater)
         val builder = AlertDialog.Builder(requireContext())
@@ -193,9 +263,8 @@ class DashboardFragment : Fragment() {
 
         val calendar = Calendar.getInstance()
         var selectedDateFormatted = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(calendar.time)
-        var selectedTimeFormatted = "08:30" // Default Slot Jam
+        var selectedTimeFormatted = ""
 
-        // 1. FITUR TANGGAL (HARI SEBELUMNYA DI-DISABLE / ABU-ABU)
         dialogBinding.btnPilihTanggal.setOnClickListener {
             val datePickerDialog = DatePickerDialog(requireContext(), { _, year, month, dayOfMonth ->
                 calendar.set(year, month, dayOfMonth)
@@ -204,37 +273,39 @@ class DashboardFragment : Fragment() {
                 dialogBinding.btnPilihTanggal.text = "$displayDate ▼"
             }, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH))
 
-            // Kunci Tanggal Minimal = Hari Ini (Tanggal lalu otomatis abu-abu & tidak bisa diklik)
             datePickerDialog.datePicker.minDate = System.currentTimeMillis() - 1000
             datePickerDialog.show()
         }
 
-        // 2. FITUR SLOT JAM OPERASIONAL BENGKEL
-        val slotJamBengkel = arrayOf(
-            "07:00 WIB",
-            "08:30 WIB",
-            "10:00 WIB",
-            "11:30 WIB",
-            "13:00 WIB",
-            "14:30 WIB",
-            "16:00 WIB"
-        )
-
         dialogBinding.btnPilihJam.setOnClickListener {
-            AlertDialog.Builder(requireContext())
-                .setTitle("Pilih Jam Service")
-                .setItems(slotJamBengkel) { _, which ->
-                    selectedTimeFormatted = slotJamBengkel[which]
-                    dialogBinding.btnPilihJam.text = "$selectedTimeFormatted ▼"
+            val settingsRef = FirebaseDatabase.getInstance().getReference("settings/jamOperasional")
+
+            settingsRef.get().addOnSuccessListener { snapshot ->
+                val listJam = mutableListOf<String>()
+                for (child in snapshot.children) {
+                    child.getValue(String::class.java)?.let { listJam.add(it) }
                 }
-                .show()
+
+                if (listJam.isNotEmpty()) {
+                    val slotJamArray = listJam.toTypedArray()
+                    AlertDialog.Builder(requireContext())
+                        .setTitle("Pilih Jam Service")
+                        .setItems(slotJamArray) { _, which ->
+                            selectedTimeFormatted = slotJamArray[which]
+                            dialogBinding.btnPilihJam.text = "$selectedTimeFormatted ▼"
+                        }
+                        .show()
+                } else {
+                    Toast.makeText(requireContext(), "Jam operasional belum diatur di Setting", Toast.LENGTH_SHORT).show()
+                }
+            }.addOnFailureListener {
+                Toast.makeText(requireContext(), "Gagal mengambil data jam operasional", Toast.LENGTH_SHORT).show()
+            }
         }
 
-        // Event Close & Batal
         dialogBinding.btnClose.setOnClickListener { dialog.dismiss() }
         dialogBinding.btnBatal.setOnClickListener { dialog.dismiss() }
 
-        // Event Simpan ke Firebase
         dialogBinding.btnSimpan.setOnClickListener {
             val plat = dialogBinding.etPlatNomor.text.toString().trim()
             val nama = dialogBinding.etNama.text.toString().trim()
@@ -250,13 +321,14 @@ class DashboardFragment : Fragment() {
                 dialogBinding.etNama.error = "Nama wajib diisi"
                 return@setOnClickListener
             }
+            if (selectedTimeFormatted.isEmpty()) {
+                Toast.makeText(requireContext(), "Pilih jam service terlebih dahulu", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
 
-            // Simpan Data
             val dbRef = FirebaseDatabase.getInstance().getReference("reservasi")
             val newKey = dbRef.push().key ?: System.currentTimeMillis().toString()
-
-            val currentTime = SimpleDateFormat("dd/M/yyyy, HH.mm.ss", Locale.getDefault()).format(
-                Date())
+            val currentTime = SimpleDateFormat("dd/M/yyyy, HH.mm.ss", Locale.getDefault()).format(Date())
 
             val dataAntrean = HashMap<String, Any>()
             dataAntrean["namaPelanggan"] = nama
@@ -264,8 +336,8 @@ class DashboardFragment : Fragment() {
             dataAntrean["platNomor"] = plat
             dataAntrean["jenisUnit"] = unit.ifEmpty { "-" }
             dataAntrean["waktuServis"] = selectedTimeFormatted
-            dataAntrean["layanan"] = "On-Site" // Default Manual = On-Site
-            dataAntrean["status"] = "Pending"  // Default Baru = Pending
+            dataAntrean["layanan"] = "On-Site"
+            dataAntrean["status"] = "Pending"
             dataAntrean["catatan"] = keluhan.ifEmpty { "Service Rutin" }
             dataAntrean["alamat"] = "-"
             dataAntrean["tanggalReservasi"] = selectedDateFormatted
@@ -280,7 +352,6 @@ class DashboardFragment : Fragment() {
         dialog.show()
     }
 
-    // Bersihkan binding saat view dihancurkan agar tidak memory leak
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
