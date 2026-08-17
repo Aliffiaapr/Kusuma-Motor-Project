@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
     <title>Reservasi Servis - Kusuma Motors</title>
-    <!-- MENGHUBUNGKAN FILE CSS EXTERNAL -->
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -13,7 +13,7 @@
         <!-- Header Halaman -->
         <header class="header">
             <h1>Kusuma Motors</h1>
-            <p>Formulir Reservasi Servis Digital (H+1)</p>
+            <p>Formulir Reservasi Servis Digital</p>
         </header>
 
         <!-- Form Reservasi -->
@@ -40,10 +40,11 @@
                 </div>
             </div>
 
+            <!-- 1. PILIH LAYANAN TERLEBIH DAHULU -->
             <div class="form-group">
                 <label for="layanan">Pilih Layanan</label>
-                <select id="layanan">
-                    <option value="Home Service">Home Service (Servis di Rumah)</option>
+                <select id="layanan" required>
+                    <option value="Home Service">Home Service (Servis di Rumah - H+1)</option>
                     <option value="On-Site">On-Site (Datang ke Bengkel)</option>
                 </select>
             </div>
@@ -57,6 +58,20 @@
                 <p id="statusLokasi">Lokasi belum diambil</p>
             </div>
 
+            <!-- 2. TANGGAL DAN JAM SERVIS (MENYESUAIKAN DENGAN LAYANAN) -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="tanggalReservasi">Tanggal Servis</label>
+                    <input type="date" id="tanggalReservasi" required>
+                </div>
+                <div class="form-group">
+                    <label for="jamServis">Jam Servis</label>
+                    <select id="jamServis" required>
+                        <option value="">-- Pilih Jam --</option>
+                    </select>
+                </div>
+            </div>
+
             <div class="form-group">
                 <label for="keluhan">Catatan Servis / Keluhan</label>
                 <textarea id="keluhan" rows="3" placeholder="Jelaskan keluhan mobil Anda..."></textarea>
@@ -68,8 +83,6 @@
         </form>
     </div>
 
-    <!-- MENGHUBUNGKAN FILE JAVASCRIPT EXTERNAL -->
-    <!-- Catatan: type="module" wajib ada karena memakai Firebase ES Modules -->
     <script type="module" src="script.js"></script>
 </body>
 </html>
