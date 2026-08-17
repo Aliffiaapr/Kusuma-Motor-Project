@@ -6,7 +6,7 @@ import androidx.fragment.app.Fragment
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.kusumamotors.admin.ui.DashboardFragment
 import com.kusumamotors.admin.R
-import com.kusumamotors.admin.ui.MendatangFragment
+import com.kusumamotors.admin.ui.ListSoonFragment
 import com.kusumamotors.admin.ui.RiwayatFragment
 import com.kusumamotors.admin.ui.SettingFragment
 
@@ -25,7 +25,7 @@ class MainActivity : AppCompatActivity() {
         bottomNav.setOnItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.nav_home -> loadFragment(DashboardFragment())
-                R.id.nav_soon -> loadFragment(MendatangFragment())
+                R.id.nav_soon -> loadFragment(ListSoonFragment ())
                 R.id.nav_riwayat -> loadFragment(RiwayatFragment())
                 R.id.nav_setting -> loadFragment(SettingFragment())
             }

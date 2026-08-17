@@ -12,7 +12,7 @@ import com.kusumamotors.admin.model.Antrean
 
 class AntreanAdapter(
     private val context: Context,
-    private var listAntrean: List<Antrean> = emptyList(), // Ditambahkan default emptyList()
+    private var listAntrean: List<Antrean> = emptyList(),
     private val onItemClick: (Antrean) -> Unit,
     private val onStatusChanged: (Antrean, String) -> Unit
 ) : RecyclerView.Adapter<AntreanAdapter.AntreanViewHolder>() {
@@ -31,15 +31,25 @@ class AntreanAdapter(
         val item = listAntrean[position]
 
         with(holder.binding) {
-            // Set Teks Data Pelanggan
-            tvPlatDanNama.text = "${item.platNomor} - ${item.namaPelanggan}"
-            tvWaktuDanLayanan.text = "${item.waktuServis} | ${item.layanan}"
+            // 1. Tampilkan Plat & Nama (Gunakan displayNama agar membaca 'nama' dari web & 'namaPelanggan' manual)
+            tvPlatDanNama.text = "${item.platNomor} - ${item.displayNama}"
+
+            // 2. Tampilkan Tanggal + Jam + Layanan
+            val jamStr = item.displayJam
+            val infoWaktu = if (jamStr.isNotEmpty()) {
+                "${item.tanggalReservasi} ($jamStr)"
+            } else {
+                item.tanggalReservasi
+            }
+            tvWaktuDanLayanan.text = "$infoWaktu | ${item.layanan}"
+
+            // 3. Status Badge Text
             tvStatusBadge.text = item.status
 
-            // 1. Pasang 1 background shape dasar
+            // Pasang background shape dasar
             btnStatusBadge.setBackgroundResource(R.drawable.bg_badge_rounded)
 
-            // 2. Tentukan warna HEX sesuai status
+            // Tentukan warna HEX sesuai status
             val warnaHex = when (item.status) {
                 "Pending" -> "#FBC02D"   // Kuning
                 "Diproses" -> "#4CAF50"  // Hijau
@@ -48,10 +58,10 @@ class AntreanAdapter(
                 else -> "#FBC02D"
             }
 
-            // 3. Set warna background-nya secara dinamis
+            // Set warna background dinamis
             btnStatusBadge.backgroundTintList = ColorStateList.valueOf(Color.parseColor(warnaHex))
 
-            // Klik Kartu Utama -> Buka Dialog Detail (On-Site / Home Service)
+            // Klik Kartu Utama -> Buka Dialog Detail
             cardAntrean.setOnClickListener {
                 onItemClick(item)
             }
@@ -76,13 +86,11 @@ class AntreanAdapter(
 
     override fun getItemCount(): Int = listAntrean.size
 
-    // FUNGSI BARU: Agar panggilan submitList(...) di DashboardFragment TIDAK MERAH LAGI!
     fun submitList(newList: List<Antrean>) {
         listAntrean = newList
         notifyDataSetChanged()
     }
 
-    // Dipertahankan agar tidak membingungkan jika ada yang memanggil updateList(...)
     fun updateList(newList: List<Antrean>) {
         submitList(newList)
     }

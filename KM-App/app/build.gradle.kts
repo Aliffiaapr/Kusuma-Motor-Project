@@ -46,6 +46,8 @@ dependencies {
 
     // Material Design (Bottom Navigation, Card, FAB, Dialog)
     implementation("com.google.android.material:material:1.12.0")
+    // untuk library ZXing
+    implementation("com.google.zxing:core:3.5.3")
     implementation(libs.androidx.activity.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.constraintlayout)

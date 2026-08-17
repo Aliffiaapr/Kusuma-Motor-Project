@@ -196,23 +196,56 @@ class DashboardFragment : Fragment() {
             tvDetailNama.text = item.displayNama
             tvDetailUnit.text = item.displayUnit
             tvDetailWa.text = item.displayWa
-            tvDetailTglJam.text = "${item.tanggalReservasi} | ${item.waktuServis}"
-            tvDetailKeluhan.text = item.displayCatatan
+
+            // 1. Format Tgl & Jam (Aman dari string kosong)
+            val jamText = item.displayJam
+            tvDetailTglJam.text = if (jamText.isNotEmpty()) {
+                "${item.tanggalReservasi} | $jamText"
+            } else {
+                item.tanggalReservasi
+            }
+
+            tvDetailKeluhan.text = item.displayCatatan.ifEmpty { "-" }
             tvDetailLayanan.text = item.layanan
 
-            if (item.layanan.equals("Home Service", ignoreCase = true)) {
+            // 2. Fitur Home Service (Cek Helper `isHomeService` & GPS)
+            if (item.isHomeService) {
                 rowAlamat.visibility = View.VISIBLE
                 btnBukaMaps.visibility = View.VISIBLE
                 layoutMapPreview.visibility = View.VISIBLE
-                tvDetailAlamat.text = item.alamat.ifEmpty { "-" }
+
+                // Tampilkan Teks Alamat / Titik GPS
+                tvDetailAlamat.text = when {
+                    item.hasGpsLocation -> "Titik GPS (${item.latitude}, ${item.longitude})"
+                    item.alamat.isNotEmpty() -> item.alamat
+                    else -> "-"
+                }
 
                 btnBukaMaps.setOnClickListener {
-                    val alamatEncoded = Uri.encode(item.alamat)
-                    val gmmIntentUri = Uri.parse("geo:0,0?q=$alamatEncoded")
+                    val gmmIntentUri = if (item.hasGpsLocation) {
+                        // Navigasi presisi via Titik GPS Laptop/HP
+                        Uri.parse("geo:${item.latitude},${item.longitude}?q=${item.latitude},${item.longitude}(Lokasi Home Service)")
+                    } else {
+                        // Navigasi via Alamat Teks
+                        val alamatEncoded = Uri.encode(item.alamat)
+                        Uri.parse("geo:0,0?q=$alamatEncoded")
+                    }
+
                     val mapIntent = Intent(Intent.ACTION_VIEW, gmmIntentUri).apply {
                         setPackage("com.google.android.apps.maps")
                     }
-                    startActivity(mapIntent)
+
+                    try {
+                        startActivity(mapIntent)
+                    } catch (e: Exception) {
+                        // Fallback membuka via Browser jika aplikasi Google Maps tidak ada
+                        val urlWebMap = if (item.hasGpsLocation) {
+                            "https://maps.google.com/?q=${item.latitude},${item.longitude}"
+                        } else {
+                            "https://maps.google.com/?q=${Uri.encode(item.alamat)}"
+                        }
+                        startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(urlWebMap)))
+                    }
                 }
             } else {
                 rowAlamat.visibility = View.GONE
@@ -222,8 +255,12 @@ class DashboardFragment : Fragment() {
 
             btnCloseDetail.setOnClickListener { dialog.dismiss() }
 
+            // 3. Format Nomor WhatsApp (Ubah 08xx ke 628xx Otomatis)
             btnHubungiWa.setOnClickListener {
-                val nomorWa = item.displayWa.replace("[^0-9]".toRegex(), "")
+                var nomorWa = item.displayWa.replace("[^0-9]".toRegex(), "")
+                if (nomorWa.startsWith("0")) {
+                    nomorWa = "62" + nomorWa.substring(1)
+                }
                 val url = "https://api.whatsapp.com/send?phone=$nomorWa"
                 val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
                 startActivity(intent)

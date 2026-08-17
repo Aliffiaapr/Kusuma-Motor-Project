@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/containerDay"
+    android:layout_width="48dp"
+    android:layout_height="56dp"
+    android:layout_marginEnd="6dp"
+    android:background="@drawable/bg_day_unselected"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:padding="4dp">
+
+    <TextView
+        android:id="@+id/tvNamaHari"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Rab"
+        android:textColor="#666666"
+        android:textSize="11sp" />
+
+    <TextView
+        android:id="@+id/tvAngkaTanggal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="14"
+        android:textColor="#333333"
+        android:textSize="15sp"
+        android:textStyle="bold" />
+</LinearLayout>

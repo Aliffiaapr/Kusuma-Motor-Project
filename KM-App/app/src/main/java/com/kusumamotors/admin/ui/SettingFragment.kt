@@ -2,9 +2,13 @@ package com.kusumamotors.admin.ui
 
 import android.app.AlertDialog
 import android.app.TimePickerDialog
+import android.content.ContentValues
+import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
+import android.os.Build
 import android.os.Bundle
+import android.provider.MediaStore
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -14,12 +18,15 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import com.google.zxing.BarcodeFormat
+import com.google.zxing.qrcode.QRCodeWriter
 import com.kusumamotors.admin.databinding.DialogKonfirmasiUbahQrBinding
 import com.kusumamotors.admin.databinding.DialogLogoutBinding
 import com.kusumamotors.admin.databinding.DialogQrCodeBinding
 import com.kusumamotors.admin.databinding.DialogUbahPasswordBinding
 import com.kusumamotors.admin.databinding.FragmentSettingBinding
 import com.kusumamotors.admin.utils.showSuccessDialog
+import java.io.OutputStream
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -32,6 +39,7 @@ class SettingFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val dbRefSettings = FirebaseDatabase.getInstance().getReference("settings")
+    private var currentQrBitmap: Bitmap? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -55,7 +63,7 @@ class SettingFragment : Fragment() {
         binding.btnJamTutup.setOnClickListener { showTimePicker(isJamBuka = false) }
         binding.btnSimpanJam.setOnClickListener { simpanSettingKeFirebase() }
 
-        // LISTENER TOMBOL DIALOG SETTING
+        // LISTENER MENU SETTING
         binding.btnQrCodeBooking.setOnClickListener { showDialogQrCode() }
         binding.btnUbahPassword.setOnClickListener { showDialogUbahPassword() }
         binding.btnLogout.setOnClickListener { showDialogLogout() }
@@ -146,6 +154,60 @@ class SettingFragment : Fragment() {
         return listSlot
     }
 
+    // --- FUNGSI GENERATE BITMAP QR CODE DENGAN ZXING ---
+    private fun generateQRCodeBitmap(text: String): Bitmap {
+        val writer = QRCodeWriter()
+        val bitMatrix = writer.encode(text, BarcodeFormat.QR_CODE, 500, 500)
+        val width = bitMatrix.width
+        val height = bitMatrix.height
+        val bmp = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565)
+        for (x in 0 until width) {
+            for (y in 0 until height) {
+                bmp.setPixel(x, y, if (bitMatrix.get(x, y)) Color.BLACK else Color.WHITE)
+            }
+        }
+        return bmp
+    }
+
+    // --- FUNGSI SIMPAN GAMBAR QR KE GALERI HP ---
+    private fun simpanBitmapKeGaleri(bitmap: Bitmap) {
+        val filename = "QR_KusumaMotors_${System.currentTimeMillis()}.jpg"
+        var fos: OutputStream? = null
+
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                val resolver = requireContext().contentResolver
+                val contentValues = ContentValues().apply {
+                    put(MediaStore.MediaColumns.DISPLAY_NAME, filename)
+                    put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg")
+                    put(MediaStore.MediaColumns.RELATIVE_PATH, "DCIM/KusumaMotors")
+                }
+                val imageUri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
+                if (imageUri != null) {
+                    fos = resolver.openOutputStream(imageUri)
+                }
+            } else {
+                val resolver = requireContext().contentResolver
+                val contentValues = ContentValues().apply {
+                    put(MediaStore.MediaColumns.DISPLAY_NAME, filename)
+                    put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg")
+                }
+                val imageUri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
+                if (imageUri != null) {
+                    fos = resolver.openOutputStream(imageUri)
+                }
+            }
+
+            fos?.use {
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, it)
+                Toast.makeText(requireContext(), "QR Code berhasil disimpan ke Galeri!", Toast.LENGTH_SHORT).show()
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Toast.makeText(requireContext(), "Gagal menyimpan gambar ke Galeri", Toast.LENGTH_SHORT).show()
+        }
+    }
+
     // --- DIALOG QR CODE BOOKING ---
     private fun showDialogQrCode() {
         val bindingDialog = DialogQrCodeBinding.inflate(layoutInflater)
@@ -161,6 +223,10 @@ class SettingFragment : Fragment() {
 
             bindingDialog.tvLinkBooking.text = link
             bindingDialog.tvTerakhirDiperbarui.text = "Terakhir di perbarui $updatedAt"
+
+            // Generate Bitmap QR Asli
+            currentQrBitmap = generateQRCodeBitmap(link)
+            bindingDialog.imgQrCode.setImageBitmap(currentQrBitmap)
         }
 
         bindingDialog.btnCloseQr.setOnClickListener { dialog.dismiss() }
@@ -168,14 +234,19 @@ class SettingFragment : Fragment() {
             dialog.dismiss()
             showDialogKonfirmasiUbahQr()
         }
+
         bindingDialog.btnUnduhQr.setOnClickListener {
-            Toast.makeText(requireContext(), "QR Code berhasil diunduh ke Galeri!", Toast.LENGTH_SHORT).show()
+            currentQrBitmap?.let { bitmap ->
+                simpanBitmapKeGaleri(bitmap)
+            } ?: run {
+                Toast.makeText(requireContext(), "Gambar QR belum siap", Toast.LENGTH_SHORT).show()
+            }
         }
 
         dialog.show()
     }
 
-    // --- DIALOG KONFIRMASI UBAH QR ---
+    // --- DIALOG KONFIRMASI UBAH QR (VALIDASI PASSWORD REAL) ---
     private fun showDialogKonfirmasiUbahQr() {
         val bindingDialog = DialogKonfirmasiUbahQrBinding.inflate(layoutInflater)
         val dialog = AlertDialog.Builder(requireContext())
@@ -189,23 +260,34 @@ class SettingFragment : Fragment() {
 
         bindingDialog.btnKonfirmasiUbahQr.setOnClickListener {
             val passwordInput = bindingDialog.etPasswordAdminQr.text.toString().trim()
+
             if (passwordInput.isEmpty()) {
                 bindingDialog.etPasswordAdminQr.error = "Password wajib diisi"
                 return@setOnClickListener
             }
 
-            // Generate Token Link Baru
-            val randomToken = UUID.randomUUID().toString().take(5)
-            val newLink = "https://kusumamotors.com/booking/$randomToken"
-            val newTime = SimpleDateFormat("dd MMM yyyy, HH:mm", Locale.getDefault()).format(Date())
+            // Validasi Password Asli ke Firebase Database
+            dbRefSettings.child("adminPassword").get().addOnSuccessListener { snapshot ->
+                val passwordAsli = snapshot.getValue(String::class.java) ?: "admin123"
 
-            val qrData = HashMap<String, Any>()
-            qrData["link"] = newLink
-            qrData["updatedAt"] = newTime
+                if (passwordInput == passwordAsli) {
+                    val randomToken = UUID.randomUUID().toString().take(7)
+                    val newLink = "https://kusuma-motors.web.app/?token=$randomToken"
+                    val newTime = SimpleDateFormat("dd MMM yyyy, HH:mm", Locale("id", "ID")).format(Date())
 
-            dbRefSettings.child("qrCode").setValue(qrData).addOnSuccessListener {
-                dialog.dismiss()
-                showSuccessDialog("QR Code Berhasil\nDiperbarui !")
+                    val qrData = HashMap<String, Any>()
+                    qrData["link"] = newLink
+                    qrData["updatedAt"] = newTime
+
+                    dbRefSettings.child("qrCode").setValue(qrData).addOnSuccessListener {
+                        dialog.dismiss()
+                        showSuccessDialog("QR Code Berhasil\nDiperbarui !")
+                    }
+                } else {
+                    bindingDialog.etPasswordAdminQr.error = "Password admin salah!"
+                }
+            }.addOnFailureListener {
+                Toast.makeText(requireContext(), "Gagal verifikasi password", Toast.LENGTH_SHORT).show()
             }
         }
 
@@ -237,7 +319,6 @@ class SettingFragment : Fragment() {
                 return@setOnClickListener
             }
 
-            // Simpan password baru ke Firebase
             dbRefSettings.child("adminPassword").setValue(passBaru).addOnSuccessListener {
                 dialog.dismiss()
                 showSuccessDialog("Password Berhasil\nDiperbarui !")
@@ -259,7 +340,7 @@ class SettingFragment : Fragment() {
         bindingDialog.btnBatalLogout.setOnClickListener { dialog.dismiss() }
         bindingDialog.btnKonfirmasiLogout.setOnClickListener {
             dialog.dismiss()
-            requireActivity().finish() // Keluar aplikasi
+            requireActivity().finish()
         }
 
         dialog.show()
